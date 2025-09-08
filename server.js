@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import userRoutes from "./src/routes/userRutes.js";
 import programRoutes from "./src/routes/programRoute.js";
+import facultyRoutes from "./src/routes/facultyRoutes.js";
 
 
 
@@ -14,7 +15,8 @@ dotenv.config();
 const app = express();
 
 app.use("/api", userRoutes);
-app.use("/api/programs", programRoutes);
+app.use("/api", programRoutes);
+app.use("/api", facultyRoutes);
 
 
 

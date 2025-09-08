@@ -9,7 +9,7 @@ import {
 const router = express.Router();
 
 router.post("/", addProgram);           // Add new program
-router.get("/", getPrograms);           // Get all programs
+router.get("/getPrograms", getPrograms);         // Get all programs
 router.put("/:id", updateProgram);      // Update program by ID
 router.delete("/:id", deleteProgram);   // Delete program by ID
 
