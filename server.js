@@ -1,5 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
+import userRoutes from "./src/routes/userRutes.js";
+import programRoutes from "./src/routes/programRoute.js";
+
+
 
 import connectDB from "./dbconfig/dbconfig.js"; // Import the database connection
 
@@ -8,6 +12,9 @@ dotenv.config();
 
 // Initialize Express App
 const app = express();
+
+app.use("/api", userRoutes);
+app.use("/api/programs", programRoutes);
 
 
 
