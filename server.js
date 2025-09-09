@@ -1,32 +1,34 @@
 import express from "express";
 import dotenv from "dotenv";
-import userRoutes from "./src/routes/userRutes.js";
-import programRoutes from "./src/routes/programRoute.js";
-import facultyRoutes from "./src/routes/facultyRoutes.js";
-
-
-
-import connectDB from "./dbconfig/dbconfig.js"; // Import the database connection
-
+import allRoutes from "./src/routes/allRoutes.js";
+import connectDB from "./dbconfig/dbconfig.js";
 
 dotenv.config();
 
-// Initialize Express App
 const app = express();
 
-app.use("/api", userRoutes);
-app.use("/api", programRoutes);
-app.use("/api", facultyRoutes);
-
-
-
-// Middleware for parsing JSON bodies
+/* ---- Body parsers (must be BEFORE routes) ---- */
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+/* ---- Optional: simple logger helps a ton ---- */
+app.use((req, _res, next) => {
+  console.log(`[${req.method}] ${req.originalUrl}`);
+  next();
+});
 
+/* ---- Mount your API ---- */
+app.use("/api", allRoutes);
 
-// Start the server after successful DB connection
+// /* ---- Health check & JSON 404 ---- */
+// app.get("/health", (_req, res) => res.json({ ok: true }));
+// app.use((req, res) => res.status(404).json({ error: "Not Found", path: req.originalUrl }));
+
+/* ---- Start after DB connects ---- */
 const PORT = process.env.PORT || 5000;
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}).catch(err => {
+  console.error("DB connection failed:", err);
+  process.exit(1);
 });
