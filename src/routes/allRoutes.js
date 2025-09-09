@@ -25,6 +25,14 @@ import {
   deleteProgram,
 } from "../controllers/programController.js";
 
+import {
+  createStudentAdmission,
+  getStudentAdmissions,
+  getStudentAdmissionById,
+  updateStudentAdmission,
+  deleteStudentAdmission,
+} from "../controllers/studentAdmissionController.js";
+
 const router = express.Router();
 
 
@@ -45,6 +53,13 @@ router.post("/addProgram", addProgram);         // POST   /api/programs
 router.get("/getPrograms", getPrograms);         // GET    /api/programs
 router.put("/:id", updateProgram);    // PUT    /api/programs/:id
 router.delete("/:id", deleteProgram); // DELETE /api/programs/:id
+
+router.post("/addStudentAdmission", createStudentAdmission);   // POST   /api/student-admissions
+router.get("/getStudentAdmissions", getStudentAdmissions);     // GET    /api/student-admissions
+router.get("/:id", getStudentAdmissionById);                   // GET    /api/student-admissions/:id
+router.put("/:id", updateStudentAdmission);                    // PUT    /api/student-admissions/:id
+router.delete("/:id", deleteStudentAdmission);                 // DELETE /api/student-admissions/:id
+
 
 
 
