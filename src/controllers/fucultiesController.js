@@ -35,17 +35,16 @@ export const getFacultyById = async (req, res) => {
 // Create a new faculty
 export const addFaculty = async (req, res) => {
   try {
-    const {  fuc_name, dean } = req.body;
+    const { fuc_name, dean } = req.body;
 
-    if ( !fuc_name || !dean) {
+    if (!fuc_name || !dean) {
       return res.status(400).json({
         success: false,
-        message: " Faculty Name, and Dean are required!",
+        message: "Faculty Name and Dean are required!",
       });
     }
 
     const createdFaculty = await Faculties.create({
-      
       fuc_name,
       dean,
     });
@@ -56,6 +55,13 @@ export const addFaculty = async (req, res) => {
       data: createdFaculty,
     });
   } catch (e) {
+    if (e.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Faculty name already exists",
+        error: e.message,
+      });
+    }
     res.status(500).json({
       success: false,
       message: "Failed to create faculty",
@@ -67,19 +73,18 @@ export const addFaculty = async (req, res) => {
 // Update an existing faculty
 export const updateFaculty = async (req, res) => {
   try {
-    const {  fuc_name, dean } = req.body;
+    const { fuc_name, dean } = req.body;
 
-    if ( !fuc_name || !dean) {
+    if (!fuc_name || !dean) {
       return res.status(400).json({
         success: false,
-        message: "Code, Faculty Name, and Dean are required!",
+        message: "Faculty Name and Dean are required!",
       });
     }
 
     const faculty = await Faculties.findById(req.params.id);
 
     if (faculty) {
-      faculty.code = code;
       faculty.fuc_name = fuc_name;
       faculty.dean = dean;
 
@@ -93,6 +98,13 @@ export const updateFaculty = async (req, res) => {
       res.status(404).json({ success: false, message: "Faculty not found" });
     }
   } catch (e) {
+    if (e.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Faculty name already exists",
+        error: e.message,
+      });
+    }
     res.status(500).json({
       success: false,
       message: "Failed to update faculty",

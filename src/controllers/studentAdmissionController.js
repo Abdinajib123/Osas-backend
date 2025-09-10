@@ -54,6 +54,8 @@ export const createStudentAdmission = async (req, res) => {
       payment,
     } = req.body;
 
+    const uploadedFile = req.file; // provided by multer when a photo is uploaded
+
     if (
       !fullname ||
       !address ||
@@ -65,7 +67,7 @@ export const createStudentAdmission = async (req, res) => {
       !school ||
       !graduation_year ||
       !grade ||
-      !certificate_or_exam_result ||
+      (!certificate_or_exam_result && !uploadedFile) ||
       !faculty ||
       !department ||
       !mode ||
@@ -89,7 +91,11 @@ export const createStudentAdmission = async (req, res) => {
       school,
       graduation_year,
       grade,
-      certificate_or_exam_result,
+      certificate_or_exam_result: uploadedFile
+        ? `/uploads/${uploadedFile.filename}`
+        : certificate_or_exam_result,
+      fileName: uploadedFile ? uploadedFile.filename : undefined,
+      originalFileName: uploadedFile ? uploadedFile.originalname : undefined,
       faculty,
       department,
       mode,

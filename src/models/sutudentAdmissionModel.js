@@ -46,21 +46,25 @@ const studentAdmissionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    fileName: String,
+    originalFileName: String,
     certificate_or_exam_result: {
       type: String,
       required: true,
     },
     faculty: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Faculties", // reference to Faculties model
       required: true,
     },
-    department: {
-      type: String,
+    Department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department", // reference to Faculties model
       required: true,
     },
     mode: {
       type: String,
-      enum: ["Full-time", "Part-time", "Distance"], // example modes
+      enum: ["Full-time", "Part-time"], 
       required: true,
     },
     entry_date: {
@@ -72,6 +76,10 @@ const studentAdmissionSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    paymentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Payment'
+    }
   },
   { timestamps: true }
 );

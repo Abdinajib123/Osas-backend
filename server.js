@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import allRoutes from "./src/routes/allRoutes.js";
 import connectDB from "./dbconfig/dbconfig.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -19,6 +21,11 @@ app.use((req, _res, next) => {
 
 /* ---- Mount your API ---- */
 app.use("/api", allRoutes);
+
+/* ---- Static serving for uploaded files ---- */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // /* ---- Health check & JSON 404 ---- */
 // app.get("/health", (_req, res) => res.json({ ok: true }));

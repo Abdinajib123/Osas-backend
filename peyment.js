@@ -1,25 +1,30 @@
-import express from "express";
-import {
+import axios from "axios";
+
+// Expect these env vars to be set
+const {
   MERCHANT_API_KEY,
   MERCHANT_API_USER_ID,
   MERCHANT_U_ID,
-  waafiApi,
-} from "../config/config.js";
-import axios from "axios";
+  WAAFI_API_URL,
+} = process.env;
 
-export const createPayment = async (req, res) => {
+export const processPayment = async (req, res) => {
   try {
-    const { phone, amount } = req.body;
+    const { phone, amount, currency = "USD", description = "Payment" } = req.body;
 
-    if (!phone) throw new Error("Merchant error Phone number is required");
+    if (!phone) return res.status(400).json({ error: "Phone number is required" });
+    if (!amount) return res.status(400).json({ error: "Amount is required" });
+    if (!MERCHANT_API_KEY || !MERCHANT_API_USER_ID || !MERCHANT_U_ID || !WAAFI_API_URL) {
+      return res.status(500).json({ error: "Payment configuration missing" });
+    }
 
-    const peymentBody = {
+    const body = {
       schemaVersion: "1.0",
-      requestId: "10111331033",
+      requestId: String(Date.now()),
       timestamp: Date.now(),
       channelName: "WEB",
       serviceName: "API_PURCHASE",
-      serviceParams: { 
+      serviceParams: {
         merchantUid: MERCHANT_U_ID,
         apiUserId: MERCHANT_API_USER_ID,
         apiKey: MERCHANT_API_KEY,
@@ -28,35 +33,30 @@ export const createPayment = async (req, res) => {
           accountNo: phone,
         },
         transactionInfo: {
-          referenceId: "12334",
-          invoiceId: "7896504",
-          amount: amount,
-          currency: "USD",
-          description: "Test USD",
+          referenceId: String(Date.now()),
+          invoiceId: String(Math.floor(Math.random() * 1e9)),
+          amount: Number(amount),
+          currency,
+          description,
         },
       },
     };
 
-    const { response } = await axios.post(waafiApi, peymentBody);
-    if (response.responseMsg !== "RCS_SUCCESS") {
-      let errorMessage = "";
-      if (response.responseMsg == "RCS_NO_ROUTE_FOUND")
-        errorMessage = "Phone Number Not Found";
-      else if (response.responseMsg == "RCS_USER_REJECTED")
-        errorMessage = "Customer rejected to authorize payment";
-      else if (response.responseMsg == "Invalid_PIN")
-        errorMessage = "Customer rejected to authorize payment";
+    const { data } = await axios.post(WAAFI_API_URL, body, {
+      headers: { "Content-Type": "application/json" },
+      timeout: 30000,
+    });
 
-      return {
-        status: false,
-        error: errorMessage !== "" ? errorMessage : response.responseMsg,
-      };
+    if (!data || data.responseMsg !== "RCS_SUCCESS") {
+      let errorMessage = data?.responseMsg || "Unknown payment error";
+      if (errorMessage === "RCS_NO_ROUTE_FOUND") errorMessage = "Phone number not found";
+      if (errorMessage === "RCS_USER_REJECTED") errorMessage = "Customer rejected payment";
+      if (errorMessage === "Invalid_PIN") errorMessage = "Invalid PIN";
+      return res.status(400).json({ status: false, error: errorMessage, raw: data });
     }
-    return {
-      status: true,
-      message: "paid",
-    };
+
+    return res.status(200).json({ status: true, message: "paid", data });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };

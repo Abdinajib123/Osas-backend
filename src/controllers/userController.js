@@ -4,9 +4,9 @@ import bcrypt from "bcryptjs";
 // Add new user
 export const addUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, role } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, email, password: hashedPassword });
+    const user = new User({ username, email, password: hashedPassword, role });
     await user.save();
     res.status(201).json({ message: "User created", user });
   } catch (err) {
@@ -28,8 +28,8 @@ export const getUsers = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { username, email, password } = req.body;
-    const updateData = { username, email };
+    const { username, email, password, role } = req.body;
+    const updateData = { username, email, role };
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
     }
@@ -61,7 +61,7 @@ export const loginUser = async (req, res) => {
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
-    res.json({ message: "Login successful", user: { id: user._id, username: user.username, email: user.email } });
+    res.json({ message: "Login successful", user: { id: user._id, username: user.username, email: user.email, role: user.role } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
